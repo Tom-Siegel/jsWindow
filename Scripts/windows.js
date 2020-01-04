@@ -147,11 +147,13 @@ function jsWindow() {
 	//Methods --------------------------------------------------------------
     Object.defineProperty(this, "close", {
         value: function () {
-            jsValidation.callEvent(Me, "js.close")
+            var ev = jsValidation.callEvent(Me, "js.close")
 
-			removeSelf();
+			if (ev.stop !== true) {
+				removeSelf();
 
-            jsValidation.callEvent(Me, "js.closed")
+				jsValidation.callEvent(Me, "js.closed")
+			}
         }
     });
 
@@ -1609,7 +1611,7 @@ function jsMessager() {
 		set: function(s) { if (jsValidation.isString(s)) mvoLabel.innerText = s; }
 	});
 	
-	Object.defineProperty(this, "label", {
+	Object.defineProperty(this, "textContainer", {
 		get: function() { return mvoLabel; }
 	});
 	
@@ -1652,7 +1654,7 @@ function jsMessager() {
 	function initContent() {
 		var textContainer = document.createElement("div"); textContainer.className = "jsm-text-container";
 		var buttonContainer = document.createElement("div"); buttonContainer.className = "jsm-button-container";
-		var text = document.createElement("label"); text.className = "jsm-text";
+		var text = document.createElement("div"); text.className = "jsm-text";
 			
 		textContainer.appendChild(text);	
 		Me.body.container.appendChild(textContainer);
@@ -1663,12 +1665,15 @@ function jsMessager() {
 	}
 
 
-	function addButton(text, ret, cb) {
+	function addButton(text, ret, exit, cb) {
+		if (!jsValidation.isBool(exit)) exit = true;
 		if (jsValidation.isString(text)) {
 			var button = document.createElement("button"); button.className = "jsm-button"; button.innerText = text;
 			
 			button.addEventListener("click", function() {
-				mvoReturn = ret; Me.close(); jsValidation.call.call(cb);
+				mvoReturn = ret; returnDialog(); 
+				
+				if (exit === true) { jsValidation.call.call(cb); Me.close(); }			
 			});
 			
 			mvoBtnContainer.appendChild(button);
@@ -1679,7 +1684,6 @@ function jsMessager() {
 		window.addEventListener("resize", calcPosition);
 
 		Me.addEventListener("js.show", calcPosition);
-		Me.addEventListener("js.closed", returnDialog);
 	}
 
 	function calcPosition() {
@@ -1690,8 +1694,8 @@ function jsMessager() {
 		Me.container.setPosition(x, y);		
 	}
 
-	function returnDialog() {
-		jsValidation.callEvent(Me, "js.return", mvoReturn);
+	function returnDialog(e) {
+		var ev = jsValidation.callEvent(Me, "js.return", mvoReturn);
 	}
 
 

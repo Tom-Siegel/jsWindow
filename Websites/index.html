@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <link rel="stylesheet" type="text/css" href="../Styles/window.css" />
+	<link rel="stylesheet" type="text/css" href="../Styles/icons.css" />
+
+    <script src="../Scripts/windows.js"></script>
+</head>
+<body style="padding: 0; margin: 0;">
+	<style>.tester label, .tester span{ color: black; }.back{ background-color: green; }.cont:focus{ outline-color: green; }</style>
+
+    <div style="width: 100%; background: rgb(66,66,66);background: linear-gradient(180deg, rgba(66,66,66,1) 0%, rgba(33,33,33,1) 100%);" id="div_badge_cont">
+	
+		
+	</div>
+	
+	<label id="pel" style="border: 1px solid black; margin-top: 25px; margin-left: 30px;">test element</label>
+</body>
+</html>
+
+<script>
+	const curl = "content.html";
+	
+	jsWindowBadge.badge.parent = div_badge_cont;
+	var p = document.getElementById("pel");
+    var w1 = new jsWindow();
+    var w2 = new jsWindow();
+	var t1 = new jsTask(); t1.content = p; t1.name = "tester"
+	
+	var tt = new jsTooltip(p);
+	var ttCont = document.createElement("label"); ttCont.innerText = "tester element iuwhiurh";
+	
+	//jsMessager.alert("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.", "Meldung");
+	jsMessager.confirm("funktioniert der Confirm?", "test", function() {
+		jsMessager.alert("ja es funktioniert!");
+	});
+	
+	tt.content = ttCont; tt.direction = "right";
+
+	t1.addEventListener("js.createwindow", function(wnd) {
+		wnd.parameter.title = "test";
+	});
+
+	jsWindowBadge.append(t1);
+
+    w1.load(curl, function () {
+		w1.title = "Window 1"
+		w1.image = "https://www.freepnglogos.com/uploads/twitch-app-logo-png-3.png"
+
+        //w1.show();
+		
+		w2.load(curl, function () {
+			w2.title = "Window 2"
+			w2.parent = w1;
+			//w2.show();
+		});
+    });
+
+</script>

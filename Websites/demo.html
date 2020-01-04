@@ -44,6 +44,11 @@
 				</div>
 				<div class="row" style="margin-bottom: 5px;">
 					<div class="col-xl-4 col-md-6 col-sm-8 col-12">
+						<button class="btn btn-primary" id="btn_cr_login">login popup</button>
+					</div>
+				</div>
+				<div class="row" style="margin-bottom: 5px;">
+					<div class="col-xl-4 col-md-6 col-sm-8 col-12">
 						<button class="btn btn-primary" id="btn_cr_tt">show tooltip</button>
 					</div>
 				</div>
@@ -119,5 +124,34 @@
 		if (jsValidation.isString(text)) {
 			text_log.value += text + "\n";
 		}
+	}
+	
+	new function() {
+		var wnd_login = new jsMessager();
+			
+		wnd_login.title = "login";
+		wnd_login.addButton("login", "login", false);
+		wnd_login.addButton("cancel", "cancel", true);
+		wnd_login.textContainer.innerHTML = '<div style="display: block; padding: 10px;"><p style="margin-bottom: 0;">Username</p><input class="form-control" id="inp_user" /><p style="margin-bottom: 0;">Password</p><input class="form-control" type="password" id="inp_password" /></div>'
+		
+		
+		wnd_login.addEventListener("js.return", function(ev) {
+			var value = ev.parameter;
+			debugger
+			if (value === "login") {
+				var user = wnd_login.body.container.querySelector("#inp_user").value;
+				var password = wnd_login.body.container.querySelector("#inp_password").value;
+			
+				jsMessager.alert('user: ' + user + " | password: " + password);
+			
+				if (user === "user1234" && password === "jsWindow") { wnd_login.close(); } else {
+					jsMessager.alert("credentials are incorrect!");
+				}
+			} else { wnd_login.close(); }
+		});
+		
+		btn_cr_login.onclick = function() {
+			wnd_login.show();
+		};
 	}
 </script>
