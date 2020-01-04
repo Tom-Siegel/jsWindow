@@ -139,25 +139,30 @@ function jsWindow() {
 		set: function (s) { if (jsValidation.isBool(s)) { mvbApplyToBadge = s; }  } 
     });
 	
+	Object.defineProperty(this, "content", {
+        get: function () { return mvoBody.container.innerHTML; },
+		set: function (s) { appendContent(s);  } 
+    });
+	
 	//Methods --------------------------------------------------------------
     Object.defineProperty(this, "close", {
         value: function () {
-            jsValidation.callEvent(this, "js.close")
+            jsValidation.callEvent(Me, "js.close")
 
 			removeSelf();
 
-            jsValidation.callEvent(this, "js.closed")
+            jsValidation.callEvent(Me, "js.closed")
         }
     });
 
     Object.defineProperty(this, "maximize", {
         value: function () {
             if (mvoSettings.maximizeable === true) {
-                jsValidation.callEvent(this, "js.maximize")
+                jsValidation.callEvent(Me, "js.maximize")
 
 				maximizeSelf();
 
-                jsValidation.callEvent(this, "js.maximized")
+                jsValidation.callEvent(Me, "js.maximized")
             }
         }
     });
@@ -165,11 +170,11 @@ function jsWindow() {
     Object.defineProperty(this, "minimize", {
         value: function () {
             if (mvoSettings.minimizeable === true) {
-                jsValidation.callEvent(this, "js.minimize")
+                jsValidation.callEvent(Me, "js.minimize")
 
 				removeFromDocument();
 				
-                jsValidation.callEvent(this, "js.minimized")
+                jsValidation.callEvent(Me, "js.minimized")
             }
         }
     });
@@ -277,6 +282,8 @@ function jsWindow() {
 		} else{
 			document.body.appendChild(mvoContainer.container);
 		}
+		
+		mvoContainer.focus();
 	}
 	
 	function appendSelf(){
@@ -384,6 +391,13 @@ function jsWindow() {
 	function appendChildWindow(ev) {
 		if (jsValidation.contains(mvoChildWindows, ev.parameter) === false && ev.parameter instanceof jsWindow && ev.parameter !== Me) {
 			mvoChildWindows.push(ev.parameter);
+		}
+	}
+	
+	function appendContent(c){
+		switch (true) {
+			case jsValidation.isString(c): mvoBody.container.innerHTML = c; break;
+			case c instanceof HTMLElement: jsValidation.clearChilds(mvoBody.container); mvoBody.container.appendChild(c); break;
 		}
 	}
 	//####################################################################################
@@ -755,10 +769,10 @@ function jsRequest() {
 
 function jsWindowSettings() {
     var mvbTopWindow = true;
-    var mviPosX = 150;
-    var mviPosY = 150;
-    var mviSizeX = 600;
-    var mviSizeY = 400;
+    var mviPosX = null;
+    var mviPosY = null;
+    var mviSizeX = null;
+    var mviSizeY = null;
     var mvbMinimizeable = true;
     var mvbMaximizeable = true;
     var mvbDraggable = true;
@@ -797,24 +811,24 @@ function jsWindowSettings() {
 
     Object.defineProperty(this, "x", {
         get: function () { return mviPosX; },
-        set: function (b) { if (jsValidation.isNumber(b)) mviPosX = b; }
+        set: function (b) { if (jsValidation.isUNumber(b) || b === null) mviPosX = b; }
     });
 
 
     Object.defineProperty(this, "y", {
         get: function () { return mviPosY; },
-        set: function (b) { if (jsValidation.isNumber(b)) mviPosY = b; }
+        set: function (b) { if (jsValidation.isUNumber(b) || b === null) mviPosY = b; }
     });
 
     Object.defineProperty(this, "width", {
         get: function () { return mviSizeX; },
-        set: function (b) { if (jsValidation.isNumber(b)) mviSizeX = b; }
+        set: function (b) { if (jsValidation.isUNumber(b) || b === null) mviSizeX = b; }
     });
 
 
     Object.defineProperty(this, "height", {
         get: function () { return mviSizeY; },
-        set: function (b) { if (jsValidation.isNumber(b)) mviSizeY = b; }
+        set: function (b) { if (jsValidation.isUNumber(b) || b === null) mviSizeY = b; }
     });
 }
 
@@ -1166,8 +1180,10 @@ function jsFreeSizeable(elem) {
         elem.addEventListener("onsizeleft", function (e) {
             var x = e.mouse.pageX;
 
-            elem.style.left = x + "px";
-            elem.style.width = (oSnapState.width + (oSnapState.left - x)) + "px";
+			if (oSnapState.right > x) {
+				elem.style.left = x + "px";
+				elem.style.width = (oSnapState.width + (oSnapState.left - x)) + "px";
+			}
         });
 
         elem.addEventListener("onsizeright", function (e) {
@@ -1176,11 +1192,13 @@ function jsFreeSizeable(elem) {
             elem.style.width = (oSnapState.width + (x - oSnapState.right)) + "px";
         });
 
-        elem.addEventListener("onsizetop", function (e) {
+        elem.addEventListener("onsizetop", function (e) {	
             var y = e.mouse.pageY;
 
-            elem.style.top = y + "px";
-            elem.style.height = (oSnapState.height + (oSnapState.top - y)) + "px"
+			if (oSnapState.bottom > y) {
+				elem.style.top = y + "px";
+				elem.style.height = (oSnapState.height + (oSnapState.top - y)) + "px"
+			}
         });
 
         elem.addEventListener("onsizebottom", function (e) {
@@ -1413,6 +1431,10 @@ function jsTask() {
 				wnd.settings = mvoSettings;
 				wnd.theme = mvoTheme;
 				wnd.applyToBadge = false;
+
+				wnd.addEventListener("js.close", function() {
+					jsValidation.remove(mvoCurrentWindows, wnd);
+				});
 			
 				contentToElement(wnd, cb); mvoCurrentWindows.push(wnd);
 			
@@ -1529,7 +1551,10 @@ function jsTooltip(elem) {
 				mvoContainer.style.left = corHorizontal(rect.left + (rect.width / 2) - (cont.width / 2), cont.width) + "px";
 				mvoContainer.style.top = corVertical(rect.bottom + mviMargin, cont.height) + "px";
 			}
-			function setLeft() {}
+			function setLeft() {
+				mvoContainer.style.left = corHorizontal(rect.left - mviMargin, cont.width) + "px";
+				mvoContainer.style.top = corVertical(rect.top + (rect.height / 2) - (cont.height / 2)) + "px";	
+			}
 			function setRight() {
 				mvoContainer.style.left = corHorizontal(rect.right + mviMargin, cont.width) + "px";
 				mvoContainer.style.top = corVertical(rect.top + (rect.height / 2) - (cont.height / 2)) + "px";	
@@ -1568,6 +1593,109 @@ function jsTooltip(elem) {
 		
 		cstruct();
 	}
+}
+
+function jsMessager() {
+	jsWindow.call(this);
+	
+	var Me = this;
+	var mvoLabel = null;
+	var mvoReturn = null;
+	var mvoBtnContainer = null;
+	
+	
+	Object.defineProperty(this, "text", {
+		get: function() { return mvoLabel.innerText; },
+		set: function(s) { if (jsValidation.isString(s)) mvoLabel.innerText = s; }
+	});
+	
+	Object.defineProperty(this, "label", {
+		get: function() { return mvoLabel; }
+	});
+	
+	
+	Object.defineProperty(this, "addButton", {
+		value: addButton
+	});
+	
+	function cstruct() {
+		initContent();
+		initSettings();
+		initTheme();
+		initEvents();
+	}
+	
+	function initTheme() {
+		var theme = new jsWindowTheme("messager");
+		var obj = JSON.parse('{"header":{"title":{"icon":"icon-info"},"icons":{"minimize":"jsm-icon-disable", "maximize":"jsm-icon-disable"}},"container":{"container":"jsm-container"},"body":{"container":"jsm-body"}}');
+		
+		theme.readFromObject(obj);
+		
+		Me.theme = theme;
+	}
+	
+	function initSettings() {
+		var settings = new jsWindowSettings();
+		
+		settings.maximizeable = false;
+		settings.minimizeable = false;
+		settings.draggable = true;
+		settings.sizeable = false;
+		settings.x = null;
+		settings.y = null;
+		settings.height = null;
+		settings.width = null;
+		
+		Me.settings = settings;
+	}
+	
+	function initContent() {
+		var textContainer = document.createElement("div"); textContainer.className = "jsm-text-container";
+		var buttonContainer = document.createElement("div"); buttonContainer.className = "jsm-button-container";
+		var text = document.createElement("label"); text.className = "jsm-text";
+			
+		textContainer.appendChild(text);	
+		Me.body.container.appendChild(textContainer);
+		Me.body.container.appendChild(buttonContainer);
+		
+		mvoLabel = text;
+		mvoBtnContainer = buttonContainer;
+	}
+
+
+	function addButton(text, ret, cb) {
+		if (jsValidation.isString(text)) {
+			var button = document.createElement("button"); button.className = "jsm-button"; button.innerText = text;
+			
+			button.addEventListener("click", function() {
+				mvoReturn = ret; Me.close(); jsValidation.call.call(cb);
+			});
+			
+			mvoBtnContainer.appendChild(button);
+		}
+	}
+
+	function initEvents() {
+		window.addEventListener("resize", calcPosition);
+
+		Me.addEventListener("js.show", calcPosition);
+		Me.addEventListener("js.closed", returnDialog);
+	}
+
+	function calcPosition() {
+		var rect = jsValidation.dimensionOf(Me.container.container);
+		var x = (window.innerWidth / 2) - (rect.width / 2);
+		var y = (window.innerHeight / 2) - (rect.height / 2);
+		
+		Me.container.setPosition(x, y);		
+	}
+
+	function returnDialog() {
+		jsValidation.callEvent(Me, "js.return", mvoReturn);
+	}
+
+
+	cstruct();
 }
 
 var jsValidation = new function () {
@@ -1708,6 +1836,11 @@ var jsValidation = new function () {
 		}
 		
 		return null;
+	}
+	this.clearChilds = function(elem) {
+		if (elem instanceof HTMLElement) {
+			while (elem.lastChild != null) elem.removeChild(elem.lastChild);
+		}
 	}
 }
 
@@ -1931,11 +2064,12 @@ var jsWindowBadge = new function () {
 			}
 		});
 		
-		Object.defineProperty(this, "setParent", {
-			value: function (elem) { 
+		Object.defineProperty(this, "parent", {
+			get: function() { return mvoContainer.parentNode; },
+			set: function (elem) { 
 				if (elem instanceof HTMLElement) {
-					if (mvoParent instanceof HTMLElement){
-						mvoParent.removeChild(mvoContainer);
+					if (mvoContainer.parentNode instanceof HTMLElement){
+						mvoContainer.parentNode.removeChild(mvoContainer);
 					}
 					
 					mvoParent = elem;
@@ -1949,6 +2083,14 @@ var jsWindowBadge = new function () {
 				if (jsValidation.contains(mvaDirections, direction)) {
 					mvsDirection = direction;
 					mvoList.className = "jsw-badge-" + mvsDirection;
+				}
+			}
+		});
+		
+		Object.defineProperty(this, "removeSelf", {
+			value: function () { 
+				if (mvoContainer.parentNode instanceof HTMLElement) {
+					mvoContainer.parentNode.removeChild(mvoContainer);
 				}
 			}
 		});
@@ -1981,12 +2123,15 @@ jsFreeDraggable.prototype = Object.create(jsEventTarget.prototype);
 jsFreeSizeable.prototype = Object.create(jsEventTarget.prototype);
 jsTask.prototype = Object.create(jsEventTarget.prototype);
 jsTooltip.prototype = Object.create(jsEventTarget.prototype);
+jsMessager.prototype = Object.create(jsEventTarget.prototype);
 
 new function() {
 	var defaultClasses = JSON.parse('{"header":{"container":"jsw-header","title":{"container":"jsw-header-title","image":"","icon":"icon-window","label":""},"icons":{"container":"jsw-header-icons","close":"jsw-header-icon icon-cross","maximize":"jsw-header-icon icon-window-maximize","minimize":"jsw-header-icon icon-minus"}},"body":{"container":"jsw-body"},"container":{"container":"jsw-container"}}');
 	var defaultTheme = new jsWindowTheme("default");
 	var defaultSettings = new jsWindowSettings();
 	var taskTypes = Object.freeze({ "url":"url", "element":"element" })
+	var messagerButtons = Object.freeze({"ok":"ok","cancel":"cancel","no":"no","yes":"yes"});
+	var messagerTexts = {"ok":"OK","cancel":"Cancel","no":"No","yes":"Yes"}
 
 	Object.defineProperty(jsWindow, "style", {
 		get: function() { return defaultClasses; }
@@ -2004,5 +2149,50 @@ new function() {
 	
 	Object.defineProperty(jsTask, "content", {
 		get: function() { return taskTypes; }
+	});
+	
+	Object.defineProperty(jsMessager, "buttons", {
+		get: function() { return messagerButtons; }
+	});
+	
+	Object.defineProperty(jsMessager, "texts", {
+		get: function() { return messagerTexts; },
+		set: function(o) { if (jsValidation.isObject(o)) Object.assign(o, messagerTexts); }
+	});
+	
+	Object.defineProperty(jsMessager, "alert", {
+		value: function(text, title) {
+			var messager = new jsMessager();
+			
+			messager.text = text;
+			messager.title = title;
+			
+			messager.addButton(jsMessager.texts.ok, jsMessager.buttons.ok)
+			
+			messager.show();
+			
+			return messager;
+		}
+	});
+	
+	Object.defineProperty(jsMessager, "confirm", {
+		value: function(text, title, cb) {
+			var messager = new jsMessager();
+			
+			messager.text = text;
+			messager.title = title;
+			
+			messager.addButton(jsMessager.texts.yes, jsMessager.buttons.yes)
+			messager.addButton(jsMessager.texts.no, jsMessager.buttons.no)
+			messager.addButton(jsMessager.texts.cancel, jsMessager.buttons.cancel)
+			
+			messager.addEventListener("js.return", function(e) {
+				if (e.parameter === jsMessager.buttons.yes) jsValidation.call.call(cb);
+			});
+			
+			messager.show();
+			
+			return messager;
+		}
 	});
 }

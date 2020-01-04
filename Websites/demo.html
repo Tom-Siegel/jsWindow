@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../Styles/window.css" />
+	<link rel="stylesheet" type="text/css" href="../Styles/icons.css" />
+
+    <script src="../Scripts/windows.js"></script>
+</head>
+<body>
+	<style>.btn{width:100%}</style>
+
+	
+
+	<div class="container-fluid">
+		<p><h1>jsWindow</h1><div id="div_tb"></div></p>
+	
+		<hr />
+	
+		<div class="row">
+			<div class="col-xl-6 col-md-6 col-sm-12 col-12">
+				<div class="row" style="margin-bottom: 5px;">
+					<div class="col-xl-4 col-md-6 col-sm-8 col-12">
+						<button class="btn btn-primary" id="btn_cr_wnd">create window</button>
+					</div>
+				</div>
+				<div class="row" style="margin-bottom: 5px;">
+					<div class="col-xl-4 col-md-6 col-sm-8 col-12">
+						<button class="btn btn-primary" id="btn_cr_mb">create messagebox</button>
+					</div>
+				</div>
+				<div class="row" style="margin-bottom: 5px;">
+					<div class="col-xl-4 col-md-6 col-sm-8 col-12">
+						<button class="btn btn-primary" id="btn_cr_cf">create confirm</button>
+					</div>
+				</div>
+				<div class="row" style="margin-bottom: 5px;">
+					<div class="col-xl-4 col-md-6 col-sm-8 col-12">
+						<button class="btn btn-primary" id="btn_cr_tb">toogle taskbar</button>
+					</div>
+				</div>
+				<div class="row" style="margin-bottom: 5px;">
+					<div class="col-xl-4 col-md-6 col-sm-8 col-12">
+						<button class="btn btn-primary" id="btn_cr_tt">show tooltip</button>
+					</div>
+				</div>
+			</div>
+		
+			<div class="col-xl-6 col-md-6 col-sm-12 col-12">
+				<div class="row" style="margin-bottom: 5px;">
+					<div class="col-xl-12 col-md-12 col-sm-12 col-12">
+						<textarea class="form-control" id="ta_log" rows="15"></textarea>
+					</div>
+				</div>
+			</div>
+		
+		</div>
+	</div>
+</body>
+</html>
+
+<script>
+	var cr_window = document.getElementById("btn_cr_wnd");
+	var cr_message = document.getElementById("btn_cr_mb");
+	var cr_confirm = document.getElementById("btn_cr_cf");
+	var btn_taskbar = document.getElementById("btn_cr_tb");
+	var btn_tooltip = document.getElementById("btn_cr_tt");
+	var text_log = document.getElementById("ta_log");
+	var div_taskbar = document.getElementById("div_tb");
+	
+	var tooltip = new jsTooltip(btn_tooltip);
+	var lbl_info = document.createElement("label"); lbl_info.innerText = "drag windows via header";
+	var counter = 0;
+	
+	tooltip.direction = "bottom";
+	tooltip.content = lbl_info;
+		
+	
+	cr_window.onclick = function() {
+		var wnd = new jsWindow(); counter++;
+		
+		wnd.title = "jsWindow " + counter;
+		wnd.container.setPosition(250, 50);
+		wnd.container.setSize(400, 150);
+		
+		wnd.content = '<label>A dynamically created window.</label>';
+		
+		wnd.show(); appendLogText("created window");
+	}
+	
+	cr_message.onclick = function() {
+		jsMessager.alert("A dynamically created messagebox.", "messagebox"); appendLogText("created messagebox");
+	}
+	
+	cr_confirm.onclick = function() {
+		var messager = jsMessager.confirm("A dynamically created confirm. Press {" + jsMessager.texts.yes + "} to execute callback.", "confirm", function	() {
+			jsMessager.alert("callback executed!", "confirmed");
+		});
+		
+		messager.addEventListener("js.return", function(ev) {
+			appendLogText("returned value of confirm: " + ev.parameter);
+		});
+	}
+	
+	btn_taskbar.onclick = function() {
+		if (jsWindowBadge.badge.parent instanceof HTMLElement) {
+			jsWindowBadge.badge.removeSelf(); appendLogText("taskbar removed");
+		} else {
+			jsWindowBadge.badge.parent = div_taskbar; appendLogText("taskbar shown");
+		}
+		
+		
+	}
+	
+	function appendLogText(text) {
+		if (jsValidation.isString(text)) {
+			text_log.value += text + "\n";
+		}
+	}
+</script>
