@@ -50,7 +50,7 @@ jsMessager.confirm("A dynamically created confirm. Press {Yes} to execute callba
 ## Examples
 ### Login - window via jsMessager
 
-![confirm image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/confirm.PNG?raw=true)
+![login window image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/login.PNG?raw=true)
 
 ```javascript
 var wnd_login = new jsMessager();
