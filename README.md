@@ -18,6 +18,18 @@ This library contributes dynamic creation of fully customizeable and event based
   
 ![window image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/window.PNG?raw=true)
   
+'''javascript
+var wnd = new jsWindow(); counter++;
+		
+    wnd.title = "my Window"
+		wnd.container.setPosition(250, 50);
+		wnd.container.setSize(400, 150);
+		
+		wnd.content = '<label>A dynamically created window.</label>';
+		
+		wnd.show();
+'''
+  
 ## messagebox
   
 ![messagebox image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/Messagebox.PNG?raw=true)
