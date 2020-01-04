@@ -34,6 +34,15 @@ wnd.show();
   
 ![messagebox image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/Messagebox.PNG?raw=true)
   
+```javascript
+jsMessager.alert("A dynamically created messagebox.", "messagebox");
+```
 ## confirm
 
 ![confirm image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/confirm.PNG?raw=true)
+
+```javascript
+jsMessager.confirm("A dynamically created confirm. Press {Yes} to execute callback.", "confirm", function() {
+	jsMessager.alert("callback executed!", "confirmed");
+});
+```
