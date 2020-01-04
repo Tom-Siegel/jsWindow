@@ -14,14 +14,17 @@ This library contributes dynamic creation of fully customizeable and event based
   - class based
   - typed properties
   
-  ### window
+## window
   
-  ![window image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/window.PNG?raw=true)
+![window image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/window.PNG?raw=true)
+---
   
-  ### messagebox
+## messagebox
   
-  ![messagebox image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/Messagebox.PNG?raw=true)
+![messagebox image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/Messagebox.PNG?raw=true)
+---
   
-  ### confirm
+## confirm
 
 ![confirm image](https://github.com/TosiHyper/jsWindow/blob/master/Resources/confirm.PNG?raw=true)
+---
